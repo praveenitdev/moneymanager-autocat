@@ -1,0 +1,12 @@
+# run output: backups and CSVs contain your real transactions
+mm_runs/
+# your personal rules (payee names!) - share only rules.example.toml
+rules.toml
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+# test dumps of your data
+all.json
+init.json
+*.dump.json

@@ -1,0 +1,48 @@
+# rules.example.toml - copy to rules.toml and edit. First matching rule wins.
+# See README.md for every field. Categories must exist in your Money Manager.
+# Your own rules always beat kb.toml. Strings in single quotes need no regex escaping.
+
+[[rule]]
+name = "Groceries: quick commerce under 10K"
+type = "expense"
+match = 'ZEPTO|BLINKIT|INSTAMART'
+max_amount = 9999.99
+category = "Groceries"
+subcategory = "Quick Commerce"
+also_from = ["Household"]        # also move rows currently filed under Household
+
+[[rule]]
+name = "Rent vs electricity for one landlord (split by amount)"
+type = "expense"
+match = 'LANDLORD NAME'
+min_amount = 20000
+category = "Household"
+subcategory = "Rent"
+
+[[rule]]
+name = "Landlord electricity share"
+type = "expense"
+match = 'LANDLORD NAME'
+max_amount = 19999.99
+category = "Household"
+subcategory = "Electricity"
+
+[[rule]]
+name = "Streaming (override even if already categorised)"
+type = "expense"
+match = 'NETFLIX|HOTSTAR'
+category = "Culture"
+subcategory = "OTT"
+override = true
+
+[[rule]]
+name = "Salary"
+type = "income"
+match = 'YOUR EMPLOYER'
+category = "Salary"
+
+[[rule]]
+name = "Flag a transfer-like payee (never changed, listed for you)"
+type = "expense"
+match = 'FRIEND NAME'
+flag = "money lent - make it a Transfer to their account"

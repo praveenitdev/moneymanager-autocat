@@ -1,0 +1,562 @@
+# kb.toml - built-in knowledge base of Indian merchants / bank-statement patterns.
+# Lower priority than rules.toml. Rules whose category you don't have are skipped silently,
+# so this adapts to your own category tree. confidence: "high" = applied by default,
+# "medium" = goes to the review CSV. `flag = "why"` = list for manual handling, never changed.
+# Same fields as rules.toml (match, exclude, pay_type, not_pay_type, min/max_amount, ...).
+
+# =========================================================================== FLAGS (transfers etc.)
+[[rule]]
+name = "flag: credit-card bill payment"
+type = "expense"
+match = 'CREDIT\s*CARD\s*BILL|CC\s*BILL|CARD\s*BILL|CRED\s*(?:PAYMENT|CLUB)|BILLDESK.*CARD|PAYMENT.*TO.*CARD'
+flag = "card bill / repayment - should be a Transfer to the card account"
+
+[[rule]]
+name = "flag: EMI principal / foreclosure"
+type = "expense"
+match = 'EMI\s*PRINCIPAL|FORECLOS|PRE-?CLOSURE|LOAN\s*REPAYMENT|PRINCIPAL\s*REPAY'
+flag = "loan principal - should be a Transfer to the loan account (only interest/fees are expense)"
+
+[[rule]]
+name = "flag: cash withdrawal"
+type = "expense"
+match = '\bATM\b.*(?:WDL|WITHDRAW|CASH)|CASH\s*WITHDRAW|NWD-|CASH\s*WDL'
+flag = "cash withdrawal - should be a Transfer to Cash"
+
+[[rule]]
+name = "flag: gold / investment purchase"
+type = "expense"
+match = 'SPARKLE|DIGITAL\s*GOLD|SAFEGOLD|AUGMONT|MMTC|GOLD\s*(?:BUY|PURCHASE)|ZERODHA|GROWW|UPSTOX|INDMONEY|\bCOIN\b.*ZERODHA|MUTUAL\s*FUND|\bSIP\b|NPS\s*TIER|OLYMP'
+flag = "investment purchase - should be a Transfer to the investment account"
+
+[[rule]]
+name = "flag: untracked / opening balance placeholders"
+type = "expense"
+match = 'UNTRACKED|OPENING\s*BALANCE|SOURCE\s*TO\s*CONFIRM|BALANCE\s*ADJUST'
+flag = "placeholder / balance adjustment - not a real expense"
+
+[[rule]]
+name = "flag: income that is really a transfer / deposit"
+type = "income"
+match = 'UNTRACKED|CASH\s*DEPOSIT|OPENING\s*BALANCE|SOURCE\s*TO\s*CONFIRM|SELF\s*TRANSFER|OWN\s*ACCOUNT'
+flag = "placeholder / cash deposit - should be a Transfer, not income"
+
+[[rule]]
+name = "flag: unknown UPI payee"
+type = "expense"
+match = 'UPI\s*OUT\s*PAYEE\s*UNKNOWN|PAYEE\s*UNKNOWN'
+flag = "payee unknown - identify from your bank app (SMS has no merchant)"
+
+# =========================================================================== EXPENSE: FOOD
+[[rule]]
+name = "kb Food: Swiggy / Zomato / EatSure"
+type = "expense"
+match = 'SWIGGY|BUNDL\s*TECH|ZOMATO(?!\s*MONEY)|EATSURE|EAT\.?FIT|FAASOS|BOX8|REBEL\s*FOODS'
+exclude = 'INSTAMART|ZOMATO\s*HYPERPURE|BLINKIT'
+category = "Food"
+subcategory = "Eating out"
+
+[[rule]]
+name = "kb Groceries: Swiggy Instamart"
+type = "expense"
+match = 'INSTAMART'
+category = "Groceries"
+subcategory = "Quick Commerce"
+
+[[rule]]
+name = "kb Food: restaurants / cafes / chains"
+type = "expense"
+match = 'RE\s?STAU?RANT|\bCAFE\b|BIRYANI|DHABA|TIFFIN|\bMESS\b|PIZZA|DOMINO|KFC|MCDONALD|BURGER|STARBUCKS|\bCHAI\b|COFFEE|BAKERY|SWEETS|ICE\s*CREAM|BEHROUZ|PARADISE|BAWARCHI|SUBWAY\s*(?:SANDWICH|RESTAURANT)|WALKIN|GOOD\s*TIM\s*ES|TEA\s*(?:STALL|POINT|HOUSE)|JUICE|HALDIRAM|WOW!?\s*MOMO|TACO\s*BELL|PIZZA\s*HUT|BARBEQUE|CHAAYOS|THIRD\s*WAVE'
+exclude = 'WINES|WINE\s*SHOP'
+category = "Food"
+subcategory = "Eating out"
+confidence = "medium"
+
+[[rule]]
+name = "kb Groceries: Licious / meat"
+type = "expense"
+match = 'DELIGHTFUL\s*GOURMET|LICIOUS|FRESHTOHOME|MUTTON|CHICKEN|MEAT\b|FISH\b|\bEGGS?\b'
+category = "Groceries"
+subcategory = "Meat & Eggs"
+
+[[rule]]
+name = "kb Groceries: milk / dairy"
+type = "expense"
+match = 'MILK|DAIRY|CURD|NANDINI|VIJAYA\s*DAIRY|HERITAGE\s*(?:FOODS|FRESH)|\bAMUL\b|MOTHER\s*DAIRY|PANEER'
+category = "Groceries"
+subcategory = "Milk & Dairy"
+
+[[rule]]
+name = "kb Groceries: supermarkets (DMart etc.)"
+type = "expense"
+match = 'AVENUE\s*S?\s*UPERMARTS?|D\s?-?MART|BIG\s?BASKET|INNOVATIVE\s*RETAIL|MORE\s*RETAIL|SPENCER|RATNADEEP|NATURE.?S\s*BASKET|NATURES?\b|JIOMART|RELIANCE\s*(?:SMART|FRESH)|SUPER\s*MARKET|SUPERMARKET|KIRANA|PROVISION|GENERAL\s*STORE|VEGETABLE|FRUITS?\b'
+category = "Groceries"
+subcategory = "Staples"
+confidence = "medium"
+
+[[rule]]
+name = "kb Groceries: Reliance Retail (mixed - review)"
+type = "expense"
+match = 'RELIANCE\s*RETAIL'
+category = "Groceries"
+confidence = "medium"
+
+# =========================================================================== EXPENSE: ALCOHOL
+[[rule]]
+name = "kb Alcohol: wine shops / bars"
+type = "expense"
+match = 'WINES?\b|WINE\s*SHOP|LIQUOR|BEER|\bBAR\b|\bPUB\b|BREWERY|BREW\s*WORKS|TASMAC|BEVCO|EXCISE|SPIRITS|TOIT|BIERE'
+exclude = 'BAKERY'
+category = "Alcohol"
+confidence = "medium"
+
+# =========================================================================== EXPENSE: TRANSPORT / TRAVEL
+[[rule]]
+name = "kb Transport: cab / auto / bike taxi"
+type = "expense"
+match = '\bUBER\b|\bOLA\b|OLACABS|ANI\s*TECH|RAPIDO|NAMMA\s*YATRI|MERU|BLUSMART|INDRIVE|YULU'
+category = "Transport"
+subcategory = "Taxi"
+
+[[rule]]
+name = "kb Transport: intercity bus (RTC / abhibus / redbus)"
+type = "expense"
+match = 'ABHIBUS|REDBUS|APSRTC|KSRTC|TSRTC|TGSRTC|SRTC|ORANGE\s*TRAVELS|VRL\s*TRAVELS|\bKPN\b'
+exclude = 'GRAM|POWER|DISTRIBUTION|BANK'
+category = "Transport"
+subcategory = "Bus"
+
+[[rule]]
+name = "kb Transport: metro"
+type = "expense"
+match = 'METRO\s*RAIL|HMRL|\bL&T\s*METRO|DMRC|BMRC|NAMMA\s*METRO'
+category = "Transport"
+subcategory = "Subway"
+
+[[rule]]
+name = "kb Transport: fuel"
+type = "expense"
+match = 'PETROL|DIESEL|\bHPCL\b|\bBPCL\b|\bIOCL?\b|INDIAN\s*OIL|BHARAT\s*PETROL|NAYARA|RELIANCE\s*BP|SHELL\b|FUEL|FILLING\s*STATION'
+category = "Transport"
+subcategory = "Fuel"
+
+[[rule]]
+name = "kb Transport: FASTag / toll / parking"
+type = "expense"
+match = 'FASTAG|NHAI|\bTOLL\b|PARKING|PAYTM\s*FASTAG|NETC'
+category = "Transport"
+subcategory = "Parking & Toll"
+
+[[rule]]
+name = "kb Transport: bike service / parts"
+type = "expense"
+match = 'BIKE\s*(?:SERVICE|CARE|REPAIR)|MOTORS?\b|AUTO\s*(?:PARTS|SPARES|MOBILES)|TYRE|\bTIRE\b|SERVICE\s*CEN(?:TRE|TER)|ROYAL\s*ENFIELD|HERO\s*MOTO|BAJAJ\s*AUTO|HONDA|YAMAHA|SUZUKI|\bTVS\b|GARAGE|MECHANIC|ENGINE\s*OIL'
+exclude = 'ELECTRON|CROMA|RELIANCE\s*DIGITAL'
+category = "Transport"
+subcategory = "Bike Repairs & Parts"
+confidence = "medium"
+
+[[rule]]
+name = "kb Travel: flights"
+type = "expense"
+match = 'INDIGO|INTERGLOBE|AIR\s*INDIA|AKASA|SPICEJET|VISTARA|AIR\s*ASIA|FLIGHT'
+category = "Travel & Holidays"
+subcategory = "Flights"
+
+[[rule]]
+name = "kb Travel: trains (IRCTC)"
+type = "expense"
+match = 'IRCTC|RAILWAY|RAILYATRI|CONFIRMTKT|TRAINMAN'
+category = "Travel & Holidays"
+subcategory = "Train & Bus"
+
+[[rule]]
+name = "kb Travel: stay"
+type = "expense"
+match = '\bOYO\b|AIRBNB|TREEBO|FABHOTEL|HOTEL\s*BOOKING|BOOKING\.COM|AGODA|RESORT|HOMESTAY|LODGE|HOSTEL'
+category = "Travel & Holidays"
+subcategory = "Stay"
+confidence = "medium"
+
+[[rule]]
+name = "kb Travel: MakeMyTrip / Goibibo / Cleartrip (booking type unknown)"
+type = "expense"
+match = 'MAKEMYTRIP|GOIBIBO|CLEARTRIP|YATRA|EASEMYTRIP|IXIGO'
+category = "Travel & Holidays"
+confidence = "medium"
+
+# =========================================================================== EXPENSE: UTILITIES / HOME
+[[rule]]
+name = "kb Utilities: internet / broadband"
+type = "expense"
+match = 'ACT\s*FIBER|AIRTEL\s*XSTREAM|JIOFIBER|JIO\s*FIBER|EXCITEL|HATHWAY|SPECTRA|BROADBAND|FIBERNET|TIKONA'
+category = "Utilities"
+subcategory = "Internet"
+
+[[rule]]
+name = "kb Utilities: mobile recharge"
+type = "expense"
+match = 'AIRTEL|\bJIO\b|RELIANCE\s*JIO|VODAFONE|\bBSNL\b|RECHARGE|PREPAID|POSTPAID'
+exclude = 'XSTREAM|FIBER|BROADBAND|WALLET'
+category = "Utilities"
+subcategory = "Mobile"
+
+[[rule]]
+name = "kb Household: electricity bills"
+type = "expense"
+match = 'TGSPDCL|TSSPDCL|TSNPDCL|APSPDCL|BESCOM|MSEDCL|TATA\s*POWER|ADANI\s*ELECTRIC|ELECTRICITY|POWER\s*DISTRIBUTION|DISCOM|BSES'
+category = "Household"
+subcategory = "Electricity"
+confidence = "medium"
+
+[[rule]]
+name = "kb Household: gas cylinder"
+type = "expense"
+match = 'INDANE|HP\s*GAS|BHARAT\s*GAS|BHARATGAS|GAS\s*(?:CYLINDER|AGENCY|BOOKING)|PIPED\s*GAS|MAHANAGAR\s*GAS'
+category = "Household"
+subcategory = "Gas"
+
+[[rule]]
+name = "kb Household: appliances (brands)"
+type = "expense"
+match = 'WHIRLPOOL|HAIER|VOLTAS|BLUE\s*STAR|PRESTIGE|BAJAJ\s*ELECTRICALS|HAVELLS|PHILIPS|PRESTIGE|BUTTERFLY|PIGEON|KENT\s*RO|AQUAGUARD|ORIENT\s*ELECTRIC|CROMPTON'
+category = "Household"
+subcategory = "Appliances"
+confidence = "medium"
+
+[[rule]]
+name = "kb Household: furniture"
+type = "expense"
+match = 'FURNITURE|\bFUR\b|PLYWOOD|MATTRESS|SLEEPWELL|WAKEFIT|PEPPERFRY|URBAN\s*LADDER|IKEA|HOMETOWN|CARPENTER'
+category = "Household"
+subcategory = "Furniture"
+confidence = "medium"
+
+[[rule]]
+name = "kb Home Services: Urban Company / Urbanclap"
+type = "expense"
+match = 'URBAN\s*COMPANY|URBANCLAP|URBAN\s*CLAP'
+category = "Home Services"
+subcategory = "House Cleaning"
+confidence = "medium"
+
+[[rule]]
+name = "kb Home Services: plumbing / electrical / pest"
+type = "expense"
+match = 'PLUMB|ELECTRICIAN|PEST\s*CONTROL|HICARE|TERMINIX|SANITIZ|PAINT(?:ER|ING)?\b'
+category = "Home Services"
+confidence = "medium"
+
+# =========================================================================== EXPENSE: SHOPPING / PERSONAL
+[[rule]]
+name = "kb Apparel: fashion retail"
+type = "expense"
+match = 'MYNTRA|AJIO|ZUDIO|WESTSIDE|PANTALOONS|MAX\s*FASHION|H\s*&\s*M\b|\bZARA\b|LIFESTYLE\s*INT|SHOPPERS\s*STOP|TRENDS\b|INTUNE|VAN\s*HEUSEN|PETER\s*ENGLAND|LEVIS|DECATHLON|BATA\b|WOODLAND|RELAXO|CLOTH|GARMENT|TEXTILE|SAREE|BOUTIQUE|READYMADE|\bWEARS?\b|MENSWEAR'
+category = "Apparel"
+subcategory = "Clothing"
+confidence = "medium"
+
+[[rule]]
+name = "kb Apparel: laundry / dry clean"
+type = "expense"
+match = 'LAUNDRY|DRY\s*CLEAN|DHOBI|IRONING|WASHING\s*SERVICE|URBAN\s*WASH|PRESS\s*WALA'
+category = "Apparel"
+subcategory = "Laundry"
+
+[[rule]]
+name = "kb Apparel: tailoring"
+type = "expense"
+match = 'TAILOR|STITCH|ALTERATION'
+category = "Apparel"
+subcategory = "Tailoring"
+
+[[rule]]
+name = "kb Beauty: salon / barber"
+type = "expense"
+match = 'SALON|BARBER|HAIR\s*CUT|HAIRCUT|NATURALS|GREEN\s*TRENDS|LAKME\s*SALON|TRIMMER|GROOM(?:ING)?\s*STUDIO|\bSPA\b'
+category = "Beauty"
+subcategory = "Salon & Haircut"
+confidence = "medium"
+
+[[rule]]
+name = "kb Beauty: grooming products"
+type = "expense"
+match = 'BEARDO|BOMBAY\s*SHAVING|MAN\s*COMPANY|MAMAEARTH|MINIMALIST|WOW\s*SKIN|THE\s*DERMA|NYKAA|PURPLLE'
+category = "Beauty"
+confidence = "medium"
+
+[[rule]]
+name = "kb Apparel: jewellery"
+type = "expense"
+match = 'GIVA|TANISHQ|MALABAR\s*GOLD|KALYAN\s*JEWEL|CARATLANE|JOYALUKKAS|BLUESTONE|PNG\s*JEWEL|JEWEL'
+category = "Apparel"
+subcategory = "Fashion"
+confidence = "medium"
+
+[[rule]]
+name = "kb Electronics: stores / brands"
+type = "expense"
+match = 'CROMA|VIJAY\s*SALES|RELIANCE\s*DIGITAL|BAJAJ\s*ELECTRONICS|APPLE\s*(?:STORE|INDIA|RETAIL)|IMAGINE\s*STORE|SAMSUNG|ONEPLUS|XIAOMI|\bMI\s*STORE|BOAT\s*LIFESTYLE|BOAT\b|SONY\s*(?:CENTER|CENTRE)|LENOVO|\bHP\s*WORLD|DELL\b|\bASUS\b|PRIME\s*ABGB|ELECTRONICS|MOBILES?\b|MOBILE\s*(?:STORE|SHOP|WORLD)'
+exclude = 'RECHARGE|AIRTEL|JIO'
+category = "Electronics"
+confidence = "medium"
+
+# =========================================================================== EXPENSE: HEALTH / INSURANCE / EDU
+[[rule]]
+name = "kb Health: pharmacy"
+type = "expense"
+match = 'APOLLO\s*PHARM|MEDPLUS|PHARMEASY|NETMEDS|\b1MG\b|TATA\s*1MG|PHARMACY|PHARMA\b|MEDICAL\s*(?:STORE|HALL|SHOP)|MEDICALS?\b|CHEMIST|MEDICINE'
+category = "Health"
+subcategory = "Medicine"
+
+[[rule]]
+name = "kb Health: hospital / clinic / diagnostics"
+type = "expense"
+match = 'HOSPITAL|CLINIC|DIAGNOSTIC|PATHOLOGY|\bLABS?\b|DENTAL|DOCTOR|\bDR\.?\s|PRACTO|EYE\s*CARE|OPTICAL|LENSKART|NURSING\s*HOME|SCAN\s*CENTRE|X-?RAY|THYROCARE|LAL\s*PATH|METROPOLIS'
+category = "Health"
+subcategory = "Hospital"
+confidence = "medium"
+
+[[rule]]
+name = "kb Health: gym / fitness"
+type = "expense"
+match = '\bGYM\b|CULT\.?\s?FIT|FITNESS|CROSSFIT|ANYTIME\s*FITNESS|\bYOGA\b'
+category = "Health"
+subcategory = "Health"
+confidence = "medium"
+
+[[rule]]
+name = "kb Insurance: life"
+type = "expense"
+match = '\bLIC\b|LIFE\s*INSURANCE|HDFC\s*LIFE|ICICI\s*PRU|SBI\s*LIFE|MAX\s*LIFE|TATA\s*AIA|TERM\s*PLAN'
+category = "Insurance"
+subcategory = "Life"
+
+[[rule]]
+name = "kb Insurance: health / vehicle"
+type = "expense"
+match = 'STAR\s*HEALTH|NIVA\s*BUPA|CARE\s*HEALTH|HEALTH\s*INSURANCE|ACKO|DIGIT\s*INSURANCE|POLICYBAZAAR|BAJAJ\s*ALLIANZ|NEW\s*INDIA\s*ASSUR|TATA\s*AIG|INSURANCE'
+category = "Insurance"
+confidence = "medium"
+
+[[rule]]
+name = "kb Education: online courses / exams"
+type = "expense"
+match = 'UDEMY|COURSERA|PLURALSIGHT|LINKEDIN\s*LEARN|GREAT\s*LEARNING|UPGRAD|SCALER|\bEDX\b|KODEKLOUD|WHIZLABS|PEARSON\s*VUE|CREDLY|ACLOUD|A\s*CLOUD\s*GURU|SKILLSHARE|CODECADEMY|TRYHACKME|HACKTHEBOX|OFFSEC|CISCO\s*(?:CERT|LEARN)|LINUX\s*FOUNDATION|CNCF|HASHICORP\s*(?:CERT|EXAM)|MICROSOFT\s*(?:CERT|EXAM)|AWS\s*(?:CERT|TRAIN|EXAM)'
+category = "Education"
+subcategory = "Courses & Certifications"
+
+[[rule]]
+name = "kb Education: books"
+type = "expense"
+match = 'BOOKS?\b|BOOK\s*(?:STORE|DEPOT|HOUSE)|CROSSWORD|KINDLE|AUDIBLE'
+category = "Culture"
+subcategory = "Books"
+confidence = "medium"
+
+# =========================================================================== EXPENSE: ENTERTAINMENT / SUBS
+[[rule]]
+name = "kb Culture: OTT"
+type = "expense"
+match = 'NETFLIX|PRIME\s*VIDEO|HOTSTAR|JIO\s*CINEMA|JIOCINEMA|SONY\s*LIV|SONYLIV|ZEE5|AHA\s*VIDEO|\bAHA\b|SUN\s*NXT|YOUTUBE\s*PREMIUM|DISCOVERY\+|MXPLAYER|APPLE\s*TV'
+category = "Culture"
+subcategory = "OTT"
+
+[[rule]]
+name = "kb Culture: music"
+type = "expense"
+match = 'SPOTIFY|GAANA|WYNK|APPLE\s*MUSIC|JIOSAAVN|YOUTUBE\s*MUSIC'
+category = "Culture"
+subcategory = "Music"
+
+[[rule]]
+name = "kb Culture: movies"
+type = "expense"
+match = 'BOOKMYSHOW|BOOK\s*MY\s*SHOW|\bPVR\b|\bINOX\b|CINEPOLIS|CINEMAS?\b|MULTIPLEX|THEATRE|THEATER|DISTRICT\s*BY\s*ZOMATO'
+category = "Culture"
+subcategory = "Movie"
+
+[[rule]]
+name = "kb Culture: apps / app stores"
+type = "expense"
+match = 'GOOGLE\s*(?:PLAY|ONE|\*)|APPLE\.COM/BILL|ITUNES|APP\s*STORE|MICROSOFT\s*(?:365|STORE)|DROPBOX|NOTION|CANVA|ICLOUD'
+category = "Culture"
+subcategory = "Apps"
+confidence = "medium"
+
+[[rule]]
+name = "kb Subscriptions: AI tools"
+type = "expense"
+match = 'OPENAI|CHATGPT|ANTHROPIC|CLAUDE\.AI|CURSOR|MIDJOURNEY|PERPLEXITY|GITHUB\s*COPILOT|JETBRAINS|REPLIT|LOVABLE|GEMINI|GROK'
+category = "Subscriptions"
+subcategory = "AI Tools"
+
+[[rule]]
+name = "kb Subscriptions: Amazon Pay recurring (Prime/Audible/etc.)"
+type = "expense"
+match = 'AMAZON\s*PAY\s*RECURRING|AMAZON\s*PRIME|PRIME\s*MEMBERSHIP|AUTOPAY|MANDATE'
+category = "Subscriptions"
+confidence = "medium"
+
+[[rule]]
+name = "kb Gaming: PlayStation / Steam"
+type = "expense"
+match = 'PLAYSTATION|SONY\s*INTERACTIVE|\bPSN\b|STEAM(?:GAMES|POWERED)?\b|EPIC\s*GAMES|XBOX|NINTENDO'
+category = "Gaming"
+subcategory = "PlayStation"
+confidence = "medium"
+
+[[rule]]
+name = "kb Betting: fantasy / casino apps"
+type = "expense"
+match = 'DREAM\s?11|MY11CIRCLE|\bMPL\b|RUMMY|\bA23\b|JUNGLEE|WINZO|PARIMATCH|1XBET|BETWAY|STAKE\.COM|LOTTERY|POKER|GAMESKRAFT|ZUPEE|HOWZAT|BALLEBAAZI'
+category = "Betting & Gambling"
+confidence = "medium"
+
+# =========================================================================== EXPENSE: MISC
+[[rule]]
+name = "kb Donations: temples / charity"
+type = "expense"
+match = 'TEMPLE|DEVASTHAN|\bTTD\b|MANDIR|DONATION|ANNADAN|CHARITY|ISKCON|CHURCH|MASJID|DARGAH|GURUDWARA|\bTRUST\b|HUNDI'
+category = "Donations & Temple"
+confidence = "medium"
+
+[[rule]]
+name = "kb Gift: wedding / function / gifts"
+type = "expense"
+match = 'WEDDING|MARRIAGE|FUNCTION\s*H|MARIPELLI|BIRTHDAY|GIFT|BOUQUET|FLORIST|FLOWERS?\b|ARCHIES|FERNS\s*N\s*PETALS|IGP\b|WEDD\b'
+exclude = 'AMAZON|VOUCHER|FLIPKART'
+category = "Gift"
+confidence = "medium"
+
+[[rule]]
+name = "kb Tax: income tax / TDS / filing"
+type = "expense"
+match = 'INCOME\s*TAX|\bITD\b|\bCBDT\b|ADVANCE\s*TAX|TDS\b|TRACES|CHALLAN|PROFESSIONAL\s*TAX|GST\s*(?:PAYMENT|CHALLAN)|CLEARTAX|TAXSPANNER|\bCA\b\s*FEES?'
+category = "Tax"
+confidence = "medium"
+
+[[rule]]
+name = "kb Loans: card / EMI interest and its GST"
+type = "expense"
+match = 'CARD\s*INTEREST|INTEREST\s*AMOUNT\s*AMORT|IGST\s*CI|FINANCE\s*CHARGE|INTEREST\s*(?:ON|FOR)\s*(?:EMI|LOAN|OD|OVERDRAFT)|\bEMI\s*INTEREST'
+category = "Loans"
+subcategory = "Interest"
+
+[[rule]]
+name = "kb Loans: processing / foreclosure / late fees"
+type = "expense"
+match = 'PROCESSING\s*FEE|FORECLOSURE\s*(?:FEE|CHARGE)|PRE-?CLOSURE\s*(?:FEE|CHARGE)|LATE\s*PAYMENT\s*(?:FEE|CHARGE)|EMI\s*(?:CONVERSION|FEE)|PART\s*PAYMENT\s*CHARGE'
+category = "Loans"
+subcategory = "Fees & Charges"
+confidence = "medium"
+
+[[rule]]
+name = "kb Bank charges: fees / GST / AMC"
+type = "expense"
+match = 'ANNUAL\s*FEE|JOINING\s*FEE|SMS\s*CHARGE|ATM\s*(?:CHARGE|FEE)|DEBIT\s*CARD\s*(?:FEE|ANNUAL)|AMC\s*CHARGE|MIN(?:IMUM)?\s*BAL|CHRG|CHARGES?\b|\bIGST\b|\bGST\b|FOREX\s*MARKUP|CONVENIENCE\s*FEE|LATE\s*FEE|SERVICE\s*CHARGE|NEFT\s*CHARGE|IMPS\s*CHARGE'
+exclude = 'ZOMATO|SWIGGY|AMAZON|FLIPKART'
+category = "Bank Charges"
+confidence = "medium"
+
+[[rule]]
+name = "kb Loans: interest / processing on loan accounts"
+type = "expense"
+match = 'INTEREST|FINANCE\s*CHARGE|PROCESSING\s*FEE|PART\s*PAYMENT\s*CHARGE|BOUNCE|PENAL'
+pay_type = 'LOAN|EMI|CRED\s*(?:CARD|MARRIAGE)|FIBE|IDFC\s*PERSONAL|OVERDRAFT|\bOD\b'
+category = "Loans"
+subcategory = "Interest"
+confidence = "medium"
+
+# =========================================================================== INCOME
+[[rule]]
+name = "kb Income: salary"
+type = "income"
+match = 'SALARY|PAYROLL|\bSAL\b\s*(?:CR|FOR)'
+exclude = 'ESOP|PF\b|PENSION|REIMB|BONUS'
+category = "Salary"
+
+[[rule]]
+name = "kb Income: reimbursement"
+type = "income"
+match = 'REIMB|EXPENSE\s*CLAIM|TRAVEL\s*CLAIM|MEDICAL\s*CLAIM'
+category = "Salary"
+subcategory = "Reimbursements"
+confidence = "medium"
+
+[[rule]]
+name = "kb Income: bonus"
+type = "income"
+match = 'BONUS|VARIABLE\s*PAY|INCENTIVE|JOINING\s*BONUS|RETENTION'
+category = "Salary"
+subcategory = "Performance Bonuses"
+confidence = "medium"
+
+[[rule]]
+name = "kb Income: ESOP vesting / sale"
+type = "income"
+match = 'ESOP|RSU|VESTING|VESTED'
+category = "Salary"
+subcategory = "ESOP / RSU Sale"
+confidence = "medium"
+
+[[rule]]
+name = "kb Income: savings interest"
+type = "income"
+match = 'INT\.?\s*PD|INTEREST\s*(?:CREDIT|PAID|CAPITALI[SZ]ED)|SAVINGS?\s*INT|\bINT\s*CR|CREDIT\s*INTEREST'
+exclude = 'FD|FIXED|DEPOSIT\s*INT|TDS'
+category = "Interest"
+subcategory = "Savings"
+
+[[rule]]
+name = "kb Income: FD interest"
+type = "income"
+match = 'FD\s*INT|FIXED\s*DEPOSIT|DEPOSIT\s*INTEREST|RD\s*INT|MATURITY'
+category = "Interest"
+subcategory = "FD & Deposits"
+confidence = "medium"
+
+[[rule]]
+name = "kb Income: dividends"
+type = "income"
+match = 'DIVIDEND|\bDIV\b'
+category = "Investment Gain"
+subcategory = "Dividends"
+
+[[rule]]
+name = "kb Income: income-tax refund"
+type = "income"
+match = 'INCOME\s*TAX\s*REFUND|ITD\s*REFUND|TAX\s*REFUND|CPC\s*REFUND|CBDT'
+category = "Tax Refund"
+
+[[rule]]
+name = "kb Income: travel refund"
+type = "income"
+match = 'MAKEMYTRIP|GOIBIBO|CLEARTRIP|YATRA|IRCTC|REDBUS|ABHIBUS|INDIGO|AIR\s*INDIA'
+max_amount = 60000
+category = "Refunds"
+subcategory = "Travel"
+confidence = "medium"
+
+[[rule]]
+name = "kb Income: generic refund / reversal"
+type = "income"
+match = 'REFUND|REVERSAL|REVERSED|CHARGEBACK|RETURNED|CANCELL?ED\s*ORDER|REV\s*OF'
+max_amount = 20000
+category = "Refunds"
+subcategory = "Other"
+confidence = "medium"
+
+[[rule]]
+name = "kb Income: cashback / rewards"
+type = "income"
+match = 'CASHBACK|CASH\s*BACK|REWARD|SUPERCOIN|CRED\s*(?:COINS|CASH)|EXTRA\s*CREDIT|BONUS\s*CREDIT|SODEXO|CASHKARO|PHONEPE\s*REWARD'
+max_amount = 5000
+category = "Cashback & Rewards"
+
+[[rule]]
+name = "kb Income: freelance / consulting"
+type = "income"
+match = 'CONSULT|FREELANCE|INVOICE'
+category = "Consulting & Freelance"
+confidence = "medium"
