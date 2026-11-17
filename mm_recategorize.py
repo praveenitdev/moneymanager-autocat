@@ -406,6 +406,21 @@ def plan_all(rows: list[dict], rules: list[Rule], cats: Categories, learn: bool 
         if not FULL_ID.match(row["id"]):
             raise RuntimeError(f"unexpected id format: {row['id']!r}")
         hit = [r for r in rules if r.matches(row)]
+        # Your own consistent history (same payee, >=3 rows, >=90% agree) beats generic kb rules.
+        if learner and is_uncat(row) and not (hit and hit[0].source == "user"):
+            s = learner.suggest(row)
+            if s and s[1] == "high" and s[2].startswith("same payee"):
+                (cname, sname), conf, why_ = s
+                try:
+                    t = cats.resolve(TYPE_OF[row["inOutCode"]], cname, sname)
+                except KeyError:
+                    t = None
+                if t and not (norm(t["mbCategory"]) == "other" and not t["subCategory"]):
+                    for r in hit:
+                        r.hits += 1
+                    d = brake(Decision("learned: " + label(t), "learned", conf, why_), row, auto_limit)
+                    plan.changes.append((d, row, t))
+                    continue
         for r in hit:
             r.hits += 1
         if len({(x.target["mcid"], x.target["mcscid"]) for x in hit if x.target}) > 1:
@@ -710,8 +725,13 @@ async def run(args):
 
 
 def load_all(args, cats: Categories) -> list[Rule]:
+    """user rules > regional kb (kb_hyderabad.toml) > general kb (kb.toml). First match wins."""
     user = load_rules(Path(args.rules), cats, "user", strict=True)
-    kb = [] if args.no_kb else load_rules(Path(args.kb), cats, "kb", strict=False)
+    kb: list[Rule] = []
+    if not args.no_kb:
+        kbs = args.kb if isinstance(args.kb, (list, tuple)) else [args.kb]
+        for k in kbs:
+            kb += load_rules(Path(k), cats, "kb", strict=False)
     rules = user + kb
     print(f"Loaded {len(user)} user rules + {len(kb)} knowledge-base rules")
     return rules
@@ -844,7 +864,9 @@ def main():
                    "(or set MM_SERVER_CMD)")
     p.add_argument("--connect", metavar="HOST:PORT", help="call connection_set first if needed")
     p.add_argument("--rules", default=str(HERE / "rules.toml"), help="your rules (strict)")
-    p.add_argument("--kb", default=str(HERE / "kb.toml"), help="knowledge-base rules (lenient)")
+    p.add_argument("--kb", action="append",
+                   help="knowledge-base rules (lenient); repeatable, earlier files win. "
+                        "Default: kb_hyderabad.toml then kb.toml")
     p.add_argument("--no-kb", action="store_true", help="ignore kb.toml")
     p.add_argument("--no-learn", action="store_true", help="disable history learning + refund pairing")
     p.add_argument("--min-conf", choices=["high", "medium"], default="high",
@@ -869,7 +891,9 @@ def main():
     p.add_argument("--undo", metavar="BACKUP.json", help="restore rows from a backup file")
     p.add_argument("--dump-json", help="offline test: transactions JSON dump (read-only)")
     p.add_argument("--init-json", help="offline test: init_get_data JSON dump")
-    asyncio.run(run(p.parse_args()))
+    args = p.parse_args()
+    args.kb = args.kb or [str(HERE / "kb_hyderabad.toml"), str(HERE / "kb.toml")]
+    asyncio.run(run(args))
 
 
 if __name__ == "__main__":

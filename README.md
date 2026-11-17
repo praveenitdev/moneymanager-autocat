@@ -22,10 +22,14 @@ Dry-run by default. Never touches transfers.
 
 ## What it does (in order, first hit wins per row)
 1. **rules.toml** - your explicit rules (strict: a bad/missing category aborts the run).
-2. **kb.toml** - ~75 built-in rules for Indian merchants and bank-statement patterns (Swiggy, Zepto,
-   DMart, IRCTC, Apollo, Airtel, card interest/GST, ESOP vesting ...). Checked against *your live
-   category tree*: a rule whose category you don't have is skipped, never invented.
-3. **Learner** - what you already did. Builds payee -> category from rows you categorised yourself.
+2. **Knowledge bases** - `kb_hyderabad.toml` (regional pack: Telangana/Hyderabad utilities such as
+   TGSPDCL, HMWSSB and Bhagyanagar Gas, plus TGSRTC/Metro, RTA/Mee Seva, local hospitals, temples,
+   kirana and Rythu Bazar, wine shops and pubs, coaching centres, apartment maintenance) loads first,
+   then `kb.toml` (~75 national rules: Swiggy, Zepto, DMart, IRCTC, Apollo, Airtel, card interest/GST,
+   ESOP vesting ...). Checked against *your live category tree*: a rule whose category you don't have
+   is skipped, never invented. Add your own city with `--kb kb_mycity.toml --kb kb.toml`.
+3. **Learner** - what you already did. For the same payee (>=3 rows, >=90% agree) your own history
+   even beats generic knowledge-base rules. Builds payee -> category from rows you categorised yourself.
    High confidence = same payee, >=3 past rows, >=90% agree. Otherwise medium.
 4. **Refund pairing** - an income credit that mirrors an earlier expense at the same payee
    (<=90 days, amount <= expense) -> Refunds > Shopping / Orders & Services / Travel.

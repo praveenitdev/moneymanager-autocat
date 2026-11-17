@@ -18,7 +18,8 @@ def tree():
     return {"categories": {
         "expense": [cat(1, "🍜 Food", ["Eating out"]), cat(2, "Groceries", ["Quick Commerce", "Milk & Dairy"]),
                     cat(3, "Other"), cat(4, "Loans", ["Interest"]), cat(5, "Bank Charges"),
-                    cat(6, "🚖 Transport", ["Taxi"])],
+                    cat(6, "🚖 Transport", ["Taxi", "Bus"]), cat(11, "Utilities", ["Mobile"]),
+                    cat(12, "Household", ["Electricity"])],
         "income": [cat(7, "Other"), cat(8, "Refunds", ["Shopping"]), cat(9, "📈 Trading"),
                    cat(10, "Trading", ["Profit"])]}}
 
@@ -182,3 +183,42 @@ def test_server_that_lies_is_caught(tmp_path, capsys):
         async def update(self, row, t): pass
     run(Liar([row("SWIGGY ORDER", 250)]), tmp_path)
     assert "MISMATCH" in capsys.readouterr().out
+
+
+# ----------------------------------------------------------------- regional pack (Hyderabad / Telangana)
+def regional(tmp_path=None):
+    cats = m.Categories(tree())
+    return cats, m.load_rules(ROOT / "kb_hyderabad.toml", cats, "kb", False) + \
+        m.load_rules(ROOT / "kb.toml", cats, "kb", False)
+
+
+def test_regional_no_false_positives():
+    cats, rules = regional()
+    for title in ("NETFLIX MUMBAI IN [9003]", "BASHA BABAI MUNTHA MASALA", "GMR HOSPITALITY LIMITED",
+                  "UPI: Killada Vi", "UPI: CHAITANYA K", "FRESH FRUIT JUICE POINT x",
+                  "CRED marriage loan interest 4/9", "UPI: SRIRAMULA Happy Birt"):
+        plan = m.plan_all([row(title)], [r for r in rules if r.conf == "high"], cats, learn=False)
+        assert all(r["mbContent"] != title or d.source == "kb" and d.conf != "high"
+                   for d, r, _ in plan.changes), title
+    cats2, rules2 = regional()
+    for title in ("BASHA BABAI MUNTHA MASALA", "NETFLIX MUMBAI IN [9003]"):
+        got = [(r.name, t["mbCategory"]) for r in rules2 if r.matches(row(title))
+               for t in [r.target] if t]
+        assert not any(n.startswith("reg Household: maid") for n, _ in got), got
+
+
+def test_regional_positives():
+    cats, rules = regional()
+    exp = {"HMWSSB WATER BILL": "Utilities", "TGSPDCL BILL PAY": "Household", "PARADISE FOOD COURT": "Food",
+           "UPI: Rapido": "🚖 Transport", "Metro L&T Metro Rail Hyderabad": "🚖 Transport"}
+    for title, want in exp.items():
+        plan = m.plan_all([row(title)], rules, cats, learn=False)
+        assert plan.changes and m.norm(plan.changes[0][2]["mbCategory"]) == m.norm(want), title
+
+
+def test_history_beats_generic_kb():
+    hist = [row("GITHUB INC", cat="Groceries") for _ in range(4)]       # your own convention
+    cats, rules = regional()
+    plan = m.plan_all(hist + [row("GITHUB INC", 5)], rules, cats)
+    new = [(d, t) for d, r, t in plan.changes if r["mbContent"] == "GITHUB INC" and m.is_uncat(r)]
+    assert new and new[0][0].source == "learned"

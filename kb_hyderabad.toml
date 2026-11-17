@@ -1,0 +1,515 @@
+# kb_hyderabad.toml - regional pack: India / Telangana / Hyderabad merchants, utilities and
+# local conventions. Loaded BEFORE kb.toml (first match wins), so local patterns take priority.
+# Same format as kb.toml. Rules whose categories you don't have are skipped silently.
+# Keep it generic (public merchants/institutions only) - no personal names.
+
+# ======================================================================= FLAGS
+[[rule]]
+name = "flag: wallet / FASTag / prepaid top-up"
+type = "expense"
+match = 'ADD\s*MONEY|WALLET\s*(?:LOAD|TOP\s*-?UP)|TOP\s*-?UP\s*(?:WALLET|BALANCE)|LOAD\s*MONEY'
+exclude = 'FEE|CHARGE|COST|CONVENIENCE'
+flag = "wallet top-up - should be a Transfer to the wallet account (spend from the wallet is the expense)"
+
+[[rule]]
+name = "flag: mutual fund / demat / stock broker"
+type = "expense"
+match = 'ZERODHA|GROWW|UPSTOX|ANGEL\s*(?:ONE|BROKING)|KITE\b|\bBSE\s*STAR|NSE\s*CLEARING|ICCL|NSDL|\bCDSL\b|MF\s*UTILITIES|COIN\s*BY\s*ZERODHA|KUVERA|PAYTM\s*MONEY|SMALLCASE|HDFC\s*SEC|ICICI\s*DIRECT|5PAISA'
+flag = "investment - should be a Transfer to the investment account"
+
+[[rule]]
+name = "flag: income that is a redemption / withdrawal from investments"
+type = "income"
+match = 'REDEMPTION|REDEEM|WITHDRAWAL\s*FROM|SWEEP|PARTIAL\s*WITHDRAW|ZERODHA|GROWW|UPSTOX|SELL\s*ORDER'
+flag = "redemption - should be a Transfer from the investment account (only the gain is income)"
+
+# ======================================================================= UTILITIES (Telangana)
+[[rule]]
+name = "reg Utilities: Telangana electricity (TGSPDCL/TGNPDCL)"
+type = "expense"
+match = 'TGSPDCL|TGNPDCL|TSSPDCL|TSNPDCL|TELANGANA\s*(?:STATE\s*)?(?:SOUTHERN|NORTHERN)?\s*POWER|SOUTHERN\s*POWER\s*DISTRIBUTION|NORTHERN\s*POWER\s*DISTRIBUTION|CESC\b|TSEB|TGEB|MESCOM|BESCOM|APEPDCL|APCPDCL'
+category = "Household"
+subcategory = "Electricity"
+confidence = "medium"
+
+[[rule]]
+name = "reg Utilities: water board (HMWSSB / Jal Board)"
+type = "expense"
+match = 'HMWSSB|HYDERABAD\s*METROPOLITAN\s*WATER|METRO\s*WATER|WATER\s*(?:BOARD|BILL|SUPPLY|TANKER|CAN)|JAL\s*BOARD|BWSSB|AQUA\s*PLANT|DRINKING\s*WATER'
+category = "Utilities"
+confidence = "medium"
+
+[[rule]]
+name = "reg Utilities: piped gas / cylinder (Bhagyanagar Gas, HP, Bharat, Indane)"
+type = "expense"
+match = 'BHAGYANAGAR\s*GAS|\bBGL\b|MEGHA\s*GAS|MAHANAGAR|\bIGL\b|HP\s*GAS|BHARAT\s*GAS|BHARATGAS|INDANE|GAS\s*(?:AGENCY|CYLINDER|BOOKING|BILL)|LPG|CYLINDER'
+category = "Household"
+subcategory = "Gas"
+
+[[rule]]
+name = "reg Utilities: DTH / cable TV"
+type = "expense"
+match = 'TATA\s*(?:PLAY|SKY)|AIRTEL\s*DIGITAL\s*TV|DISH\s*TV|SUN\s*DIRECT|VIDEOCON\s*D2H|\bD2H\b|CABLE\s*(?:TV|OPERATOR|NETWORK)|HATHWAY\s*CABLE|\bDEN\s*NETWORK|SITI\s*CABLE'
+category = "Utilities"
+confidence = "medium"
+
+[[rule]]
+name = "reg Utilities: broadband (ACT, Airtel Xstream, JioFiber, Hathway, local ISPs)"
+type = "expense"
+match = 'ACT\s*FIBER|ATRIA\s*CONVERGENCE|AIRTEL\s*XSTREAM|XSTREAM\s*FIBER|JIO\s*FIBER|JIOFIBER|JIO\s*AIR\s*FIBER|HATHWAY|EXCITEL|TIKONA|SPECTRA|YOU\s*BROADBAND|D-?VOIS|SCV\b|BSNL\s*(?:FTTH|BHARAT\s*FIBRE|BROADBAND)|FIBERNET|BROADBAND|WIFI\s*(?:BILL|RECHARGE)'
+category = "Utilities"
+subcategory = "Internet"
+
+[[rule]]
+name = "reg Utilities: mobile recharge / postpaid (Airtel, Jio, Vi, BSNL)"
+type = "expense"
+match = 'AIRTEL|BHARTI\s*AIRTEL|\bJIO\b|JIO\d|JIOINAPP|RELIANCE\s*J\b|RELIANCE\s*JIO|VODAFONE\s*IDEA|VI\s*(?:PREPAID|POSTPAID|RECHARGE)|\bBSNL\b|MTNL|RECHARGE|PREPAID\s*(?:PLAN|MOBILE)|POSTPAID\s*BILL|MOBILE\s*(?:BILL|RECHARGE)'
+exclude = 'XSTREAM|FIBER|FIBRE|BROADBAND|DIGITAL\s*TV|WALLET|PAYMENTS\s*BANK|FTTH|AIRTEL\s*MONEY'
+category = "Utilities"
+subcategory = "Mobile"
+
+[[rule]]
+name = "reg Household: apartment maintenance / society / RWA"
+type = "expense"
+match = 'ASSOCIA(?:TION)?|APARTMENTS?|MAINTENANCE|\bRWA\b|MYGATE|NOBROKERHOOD|ADDA\s*(?:MAINT|APT)|APARTMENTA|GATED\s*COMMUNITY|SOCIETY\s*(?:CHARGES|DUES)|SINKING\s*FUND|CAM\s*CHARGES'
+exclude = 'ALUMNI|ASSOCIATES|HEALTH\s*INSURANCE'
+category = "Household"
+confidence = "medium"
+
+[[rule]]
+name = "reg Household: house rent / brokerage"
+type = "expense"
+match = 'HOUSE\s*RENT|RENT\s*(?:FOR|PAID|PAYMENT|MONTH)|MONTHLY\s*RENT|NOBROKER\s*(?:RENT|PAY)|NO\s*BROKER|RENTPAY|RED\s*GIRAFFE|CRED\s*RENT|PAYTM\s*RENT|BROKERAGE|HOUSING\.COM|MAGICBRICKS|99ACRES'
+exclude = 'RENTOMOJO|FURLENCO|CITYFURNISH|RENT\s*A\s*CAR|DRIVE'
+category = "Household"
+subcategory = "Rent"
+confidence = "medium"
+
+[[rule]]
+name = "reg Housing: furniture / appliance rental"
+type = "expense"
+match = 'RENTOMOJO|FURLENCO|CITYFURNISH|GRABHOUSE|RENTICKLE|GEETA\s*RENTALS?'
+category = "Housing"
+subcategory = "Furniture & Appliance Rental"
+
+[[rule]]
+name = "reg Tax: GHMC / municipal property tax"
+type = "expense"
+match = 'GHMC|PROPERTY\s*TAX|MUNICIPAL\s*(?:TAX|CORP)|MUNICIPALITY|GRAM\s*PANCHAYAT\s*TAX|HOUSE\s*TAX'
+category = "Tax"
+confidence = "medium"
+
+# ======================================================================= GOVERNMENT / RTA / SEVA
+[[rule]]
+name = "reg Transport: RTA / RTO / challan / HSRP / PUC / road tax"
+type = "expense"
+match = '\bRTA\b|\bRTO\b|PARIVAHAN|VAHAN|ROAD\s*TAX|E-?CHALLAN|TRAFFIC\s*(?:FINE|CHALLAN|POLICE)|HYD(?:ERABAD)?\s*TRAFFIC|\bHSRP\b|\bPUC\b|POLLUTION\s*(?:CERT|CHECK)|TRANSPORT\s*(?:DEPT|DEPARTMENT)|TGTRANSPORT|TSTRANSPORT|DRIVING\s*(?:LICEN[CS]E|SCHOOL)|LEARNER'
+category = "Transport"
+subcategory = "Bike Insurance & RTO"
+confidence = "medium"
+
+[[rule]]
+name = "reg Govt: Mee Seva / e-Seva / passport / Aadhaar / registrations"
+type = "expense"
+match = 'MEE\s*-?SEVA|MEESEVA|\bE-?SEVA\b|TS-?ONLINE|TG\s*ONLINE|PASSPORT\s*(?:SEVA|OFFICE)|\bAADHAAR\b|\bUIDAI\b|STAMPS?\s*(?:AND|&)\s*REGISTRATION|REGISTRATION\s*FEE|SUB\s*REGISTRAR|NOTARY|AFFIDAVIT|\bTS\s*BPASS|ENCUMBRANCE'
+category = "Tax"
+confidence = "medium"
+
+[[rule]]
+name = "reg Education: Telangana / national entrance exam and board fees"
+type = "expense"
+match = 'POLYCET|EAMCET|EAPCET|\bTS\s*ICET|\bTG\s*ICET|\bTSPSC|TGPSC|\bTSRJC|\bTREIRB|\bJEE\b|\bNEET\b|\bGATE\s*(?:EXAM|FEE|20)|\bCAT\s*(?:EXAM|20)|\bUGC\s*NET|NTA\b|JNTU|OSMANIA\s*UNIV|SSC\s*BOARD|BIE\s*TELANGANA|EXAM\s*FEE|ENTRANCE\s*(?:FEE|EXAM)|APPLICATION\s*FEE|HALL\s*TICKET'
+category = "Education"
+subcategory = "Academy"
+
+[[rule]]
+name = "reg Education: coaching / schools / ed-tech"
+type = "expense"
+match = 'NARAYANA|SRI\s*CHAITANYA|SRI\s*GAYATRI|FIITJEE|ALLEN\s*(?:CAREER|KOTA)|AAKASH|PHYSICS\s*WALLAH|PHYSICSWALLAH|UNACADEMY|VEDANTU|BYJU|TOPPR|WHITEHAT|EDUREKA|SIMPLILEARN|\bNIIT\b|APTECH|\bCOACHING|TUITION|SCHOOL\s*FEE|COLLEGE\s*FEE|TERM\s*FEE|ADMISSION|\bSCHOOL\b|\bCOLLEGE\b|\bINSTITUTE\b'
+exclude = 'BOOK|STORE|BAZAAR'
+category = "Education"
+subcategory = "Schooling"
+confidence = "medium"
+
+# ======================================================================= FOOD (Hyderabad staples)
+[[rule]]
+name = "reg Food: Hyderabad chains and biryani houses"
+type = "expense"
+match = 'PARADISE\s*(?:FOOD|BIRYANI|RESTAURANT)|BAWARCHI|SHAH\s*GHOUSE|PISTA\s*HOUSE|CREAM\s*STONE|KARACHI\s*BAKERY|CHUTNEYS|OHRI|MEHFIL|HYDERABAD\s*HOUSE|BARBEQUE\s*NATION|\bBBQ\s*NATION|MINERVA|EAT\s*STREET|NIZAM|HYDERABADI|MEDIEVAL|ALPHA\s*HOTEL|CAFE\s*BAHAR|CAFE\s*NILOUFER|NILOUFER|SANGEETH|SUBWAY|TACO\s*BELL|BURGER\s*KING|KFC|MCDONALD|DOMINO|PIZZA\s*HUT|LITTLE\s*CAESAR|STARBUCKS|CAFE\s*COFFEE\s*DAY|\bCCD\b|BLUE\s*TOKAI|THIRD\s*WAVE|THEOBROMA|BIKANERVALA|HALDIRAM|SAGAR\s*RATNA|UDUPI|KAMAT|WOW\s*MOMO|FAASOS|BEHROUZ|OVEN\s*STORY|LUNCHBOX|CHAI\s*(?:POINT|WALA|SUTTA)|CHAAYOS|TEA\s*TRAILS|MAD\s*OVER\s*DONUTS|BASKIN|NATURALS\s*ICE|BAKERS?\s*(?:STREET|HUB)'
+category = "Food"
+subcategory = "Eating out"
+
+[[rule]]
+name = "reg Food: generic Indian eateries (hotel / tiffins / mess / meals / bhojanam)"
+type = "expense"
+match = '\bHOTEL\b|TIFFINS?|\bMESS\b|BHOJANAM|BHOJAN|\bMEALS?\b|\bIDLI\b|\bDOSA\b|\bPARATHA|\bPARATA\b|CANTEEN|FAST\s*FOOD|FOOD\s*COURT|CHAT\s*(?:BHANDAR|CENTRE|CENTER)|PANI\s*PURI|TEA\s*(?:STALL|SHOP|POINT)|CHAI\b|JUICE\s*(?:CENTRE|CENTER|SHOP|POINT)|\bJUICES?\b|SWEET\s*(?:HOUSE|SHOP|STALL)|\bSWEETS\b|\bBAKERY\b|\bBAKERS\b|DHABA|PUNJABI|MANDI\b|SHAWARMA|\bROLLS?\b|MOMOS?\b|RESTAURANT|RE\s?STAURANT|\bCAFE\b|BISTRO|\bGRILL\b|KITCHEN\b|BIRYANI|\bFOODS?\b'
+exclude = 'HOTEL\s*BOOKING|OYO|TREEBO|BOOKING|MAKEMYTRIP|GOIBIBO|CLEARTRIP|AGODA|CAR\s*DEALER|WINE|BAR\b|MEDICAL|HOSPITAL|FOODS\s*(?:PVT|LTD)|CITRUS|DELIGHTFUL|FOOD\s*CORPORATION'
+category = "Food"
+subcategory = "Eating out"
+confidence = "medium"
+
+[[rule]]
+name = "reg Groceries: Hyderabad / Telangana supermarkets and dairies"
+type = "expense"
+match = 'VIJETHA|RATNADEEP|HERITAGE\s*(?:FRESH|FOODS)|VIJAYA\s*(?:DAIRY|TELANGANA|MILK)|\bMORE\s*(?:MEGASTORE|RETAIL|SUPERMARKET)|SPENCER|RELIANCE\s*(?:FRESH|SMART)|\bSMART\s*(?:BAZAAR|POINT)|VISHAL\s*MEGA\s*MART|SUPER\s*BAZAAR|NATURE.?S\s*BASKET|FOOD\s*BAZAAR|BIG\s*BAZAAR|MILKBASKET|COUNTRY\s*DELIGHT|MILKY\s*MIST|MILK\s*MANTRA|AKSHAYAKALPA|NINJACART|KISAN\s*KONNECT|FRESHTOHOME|LICIOUS'
+exclude = 'LICIOUS\s*(?:BANK)'
+category = "Groceries"
+confidence = "medium"
+
+[[rule]]
+name = "reg Groceries: vegetables / fruits / rythu bazar / kirana"
+type = "expense"
+match = 'RYTHU\s*BAZAR|RAITHU\s*BAZAR|RYTHU|VEG(?:ETABLES?)?\b|FRUITS?\b|COCONUT|GREENS|SABZI|SUBZI'
+exclude = 'JUICE|SHAKE|ICE\s*CREAM|SALAD\s*BAR|RESTAURANT|CAFE'
+category = "Groceries"
+subcategory = "Vegetables & Fruits"
+confidence = "medium"
+
+[[rule]]
+name = "reg Groceries: kirana / provision / general stores"
+type = "expense"
+match = 'KIRANA|KIRAANA|PROVISIONS?|GENERAL\s*STORES?|\bSTAPLES\b|\bRICE\s*(?:BAG|DEPOT|MILL)|\bATTA\b|WHOLESALE\s*(?:MART|STORE)|SUPER\s*MARKET|SUPERMARKET'
+category = "Groceries"
+subcategory = "Staples"
+confidence = "medium"
+
+[[rule]]
+name = "reg Groceries: meat / fish / eggs (chicken centre, fresh meat)"
+type = "expense"
+match = 'CHICKEN\s*(?:CENTRE|CENTER|SHOP|STORE)|MUTTON|FRESH\s*MEAT|MEAT\s*(?:SHOP|CENTRE|CENTER|STORE)|FISH\s*(?:MARKET|CENTRE|CENTER|SHOP)|EGG\s*(?:STORE|SHOP|DEPOT)|\bEGGS\b'
+category = "Groceries"
+subcategory = "Meat & Eggs"
+confidence = "medium"
+
+[[rule]]
+name = "reg Groceries: snacks / packaged"
+type = "expense"
+match = 'SNACKS?\b|NAMKEEN|CHIPS|BISCUIT|CHOCOLATE|\bCANDY|PACKAGED|DRY\s*FRUITS?|MAKHANA'
+category = "Groceries"
+subcategory = "Snacks & Packaged"
+confidence = "medium"
+
+# ======================================================================= TRANSPORT (Hyderabad)
+[[rule]]
+name = "reg Transport: Hyderabad Metro / MMTS / TGSRTC / T-24"
+type = "expense"
+match = 'L\s*&\s*T\s*METRO|HYDERABAD\s*METRO|\bHMRL\b|\bMMTS\b|\bT-?24\b|TGSRTC|TSRTC|TGSRTC|RTC\s*(?:BUS|CARD|TICKET)|NCMC|CHALO|GO\s*TELANGANA|\bTAP\s*&\s*GO'
+exclude = 'GRAM|POWER|DISTRIBUTION|BANK|GRAMEENA'
+category = "Transport"
+subcategory = "Bus"
+
+[[rule]]
+name = "reg Transport: cabs / autos / bike taxis"
+type = "expense"
+match = '\bUBER\b|UBER\s*INDIA|\bOLA\b|OLACABS|ANI\s*TECH|RAPIDO|NAMMA\s*YATRI|BLUSMART|INDRIVE|\bMERU\b|SAVARI|AUTO\s*(?:FARE|RIDE|DRIVER)|CAB\s*(?:FARE|SERVICE)|TAXI|BOUNCE\b|YULU|VOGO'
+category = "Transport"
+subcategory = "Taxi"
+
+[[rule]]
+name = "reg Transport: fuel (bunk / petrol pump / CNG)"
+type = "expense"
+match = 'PETROL|DIESEL|\bCNG\b|PUMP|BUNK|FUEL|FILLING\s*STATION|\bHPCL\b|\bBPCL\b|\bIOCL?\b|INDIAN\s*OIL|BHARAT\s*PETROLEUM|HINDUSTAN\s*PETROLEUM|NAYARA|RELIANCE\s*BP|JIO-?BP|SHELL\b|ESSAR\s*OIL|SERVICE\s*STATION|AUTO\s*FUELS?|KOTHA\s*SURESH'
+exclude = 'WATER\s*PUMP|PUMP\s*(?:HOUSE|SET)|BREAST'
+category = "Transport"
+subcategory = "Fuel"
+
+[[rule]]
+name = "reg Transport: FASTag / toll / parking"
+type = "expense"
+match = 'FASTAG|NHAI|\bNETC\b|TOLL\s*(?:PLAZA|FEE)|\bTOLL\b|PARKING|PARK\s*(?:AND|&)\s*RIDE|VALET'
+category = "Transport"
+subcategory = "Parking & Toll"
+
+[[rule]]
+name = "reg Transport: bike / car service and parts (Hyderabad)"
+type = "expense"
+match = 'BIKE\s*(?:SERVICE|CARE|REPAIR|GARAGE|WASH)|TWO\s*WHEELER|SERVICE\s*(?:CENTRE|CENTER)|HERO\s*(?:MOTO|HONDA|SERVICE)|HONDA\s*(?:MOTO|SERVICE)|ROYAL\s*ENFIELD|YAMAHA|SUZUKI|TVS\s*(?:MOTOR|SERVICE)|BAJAJ\s*AUTO|AUTO\s*(?:PARTS|SPARES|MOBILES|CARE)|SPARE\s*PARTS|\bTYRES?\b|\bTIRES?\b|PUNCTURE|MECHANIC|\bGARAGE\b|ENGINE\s*OIL|LUBRICANT|BATTERY\s*(?:SHOP|STORE|WORLD)|EXIDE|AMARON|CAR\s*WASH|DENTING'
+category = "Transport"
+subcategory = "Bike Repairs & Parts"
+confidence = "medium"
+
+# ======================================================================= TRAVEL / LEISURE
+[[rule]]
+name = "reg Travel: Telangana Tourism / Haritha / local trips"
+type = "expense"
+match = 'TELANGANA\s*TOURISM|TGTDC|TSTDC|HARITHA|RAMOJI|WONDERLA|SNOW\s*WORLD|NEHRU\s*ZOOLOGICAL|ZOO\s*PARK|GOLCONDA|SALAR\s*JUNG|CHARMINAR|HUSSAIN\s*SAGAR|LUMBINI|ANANTAGIRI|SRISAILAM\s*(?:TOUR|PACKAGE)|TOUR\s*(?:PACKAGE|OPERATOR)|TRAVELS\b|HOLIDAYS?\b|ADVENTURE\b|RESORTS?\b|CAMPING|TREK'
+category = "Travel & Holidays"
+confidence = "medium"
+
+[[rule]]
+name = "reg Travel: intercity buses and trains"
+type = "expense"
+match = 'ABHIBUS|REDBUS|APSRTC|KSRTC|KPN\s*TRAVELS|VRL\s*TRAVELS|ORANGE\s*TRAVELS|SRS\s*TRAVELS|NEETA\s*TRAVELS|DIWAKAR|PARVEEN\s*TRAVELS|IRCTC|RAILWAY|RAILYATRI|CONFIRMTKT|TRAINMAN|RAIL\s*(?:TICKET|CONNECT)'
+category = "Transport"
+subcategory = "Bus"
+confidence = "medium"
+
+[[rule]]
+name = "reg Culture: cinemas in Hyderabad"
+type = "expense"
+match = 'BOOKMYSHOW|BOOK\s*MY\s*SHOW|PVR|\bINOX\b|ASIAN\s*(?:CINEMAS|CINEMA)|\bAMB\s*CINEMAS|PRASADS|CINEPOLIS|SANDHYA\s*(?:THEATRE|THEATER)|SUDHA\s*CINEMA|MULTIPLEX|CINEMAS?\b|THEATRE|THEATER|SHOWTIME'
+category = "Culture"
+subcategory = "Movie"
+
+[[rule]]
+name = "reg Alcohol: pubs, breweries, wine shops (Hyderabad / Telangana)"
+type = "expense"
+match = 'PROST\b|TOIT\b|BIERE\s*CLUB|HAMMERED|ROCK\s*TAVERN|10\s*DOWNING|MINISTRY\s*OF\s*BEER|ENIGMA|N-?GRILL|BREWERY|BREW\s*(?:WORKS|HOUSE)|BREWMASTER|TAPROOM|\bPUB\b|LOUNGE|SPEAKEASY|WINES?\s*(?:SHOP|MART|AND|&)|\bWINES\b|WINE\s*SHOP|LIQUOR|BEER\s*(?:SHOP|PARLOUR)|BEVERAGES\s*CORP|TSBCL|\bTASMAC\b|\bBAR\s*(?:AND|&)\s*RESTAURANT|PERMIT\s*ROOM'
+category = "Alcohol"
+confidence = "medium"
+
+# ======================================================================= HEALTH
+[[rule]]
+name = "reg Health: Hyderabad hospitals and clinics"
+type = "expense"
+match = 'APOLLO\s*(?:HOSPITAL|CLINIC|SPECTRA|HEALTH)|YASHODA|\bKIMS\b|KRISHNA\s*INSTITUTE|CARE\s*HOSPITAL|MEDICOVER|CONTINENTAL\s*HOSPITAL|RAINBOW\s*(?:HOSPITAL|CHILDREN)|SUNSHINE\s*HOSPITAL|\bAIG\s*HOSPITAL|ASIAN\s*INSTITUTE|NIMS\b|\bNIZAMS\b|OMEGA\s*HOSPITAL|MEDITRINA|STAR\s*HOSPITAL|CITIZENS\s*HOSPITAL|SRI\s*SAI\s*HOSPITAL|HOSPITALS?\b|NURSING\s*HOME|CLINIC|POLYCLINIC|DENTAL|DENTIST|\bDR\.?\s|\bDOCTOR|EYE\s*(?:CARE|HOSPITAL)|LENSKART|OPTICALS?|ORTHO|PEDIATRIC|MATERNITY|SCAN\s*(?:CENTRE|CENTER)|ULTRASOUND|PHYSIO(?:THERAPY)?|AYURVED|HOMEO'
+category = "Health"
+subcategory = "Hospital"
+confidence = "medium"
+
+[[rule]]
+name = "reg Health: diagnostics / labs"
+type = "expense"
+match = 'VIJAYA\s*DIAGNOSTIC|DR\.?\s*LAL|LAL\s*PATH|THYROCARE|METROPOLIS|SRL\s*DIAGNOSTIC|NEUBERG|APOLLO\s*DIAGNOSTIC|REDCLIFFE|ORANGE\s*HEALTH|PATHOLOGY|DIAGNOSTICS?|BLOOD\s*TEST|X-?RAY|\bMRI\b|\bCT\s*SCAN|\bLABS?\b|PATH\s*LAB'
+category = "Health"
+subcategory = "Hospital"
+confidence = "medium"
+
+[[rule]]
+name = "reg Health: pharmacies"
+type = "expense"
+match = 'APOLLO\s*PHARM|MEDPLUS|MED\s*PLUS|PHARMEASY|NETMEDS|\b1MG\b|TATA\s*1MG|WELLNESS\s*FOREVER|FRANKROSS|PHARMACY|PHARMACIES|PHARMA\b|CHEMIST|MEDICAL\s*(?:STORE|HALL|SHOP|AND)|MEDICALS?\b|MEDICINE|MEDICOS?\b|DRUGS?\b|HEALTHKART|HEALTHIFYME'
+category = "Health"
+subcategory = "Medicine"
+
+[[rule]]
+name = "reg Health: gyms / yoga"
+type = "expense"
+match = 'CULT\s*\.?\s*FIT|CULTFIT|GOLD.?S\s*GYM|ANYTIME\s*FITNESS|SNAP\s*FITNESS|\bGYM\b|FITNESS|CROSSFIT|PILATES|\bYOGA\b|ZUMBA|SWIMMING|BADMINTON|\bTURF\b|PLAYO|SPORTS\s*(?:CLUB|COMPLEX|ARENA)|\bCRICKET\b'
+category = "Health"
+subcategory = "Health"
+confidence = "medium"
+
+# ======================================================================= SHOPPING (Hyderabad)
+[[rule]]
+name = "reg Apparel: Hyderabad / South India clothing stores"
+type = "expense"
+match = 'CMR\s*(?:SHOPPING|FAMILY|MALL)|CHENNAI\s*SHOPPING\s*MALL|\bCSM\b|RS\s*BROTHERS|KALAMANDIR|PRIYA\s*(?:SILKS|FASHIONS)|POTHYS|SARATHA|VIVAHA|MANGALAM|SOUTH\s*INDIA\s*SHOPPING|VISHAL\s*MEGA\s*MART|V-?MART|\bMAX\s*FASHION|PANTALOONS|WESTSIDE|ZUDIO|TRENT|LIFESTYLE\s*INTERNATIONAL|SHOPPERS\s*STOP|\bR\s*MART|FABINDIA|BIBA\b|\bW\s*FOR\s*WOMAN|ALLEN\s*SOLLY|VAN\s*HEUSEN|PETER\s*ENGLAND|LOUIS\s*PHILIPPE|RAYMOND|LEVIS|\bH\s*&\s*M\b|\bZARA\b|MYNTRA|AJIO|MEESHO|JABONG|TAILORS?|TAILORING|BOUTIQUE|TEXTILES?|CLOTH(?:ES|ING|S)?|SAREES?|GARMENTS?|READYMADES?|JEANS|FOOTWEAR|SHOES?\b|\bBATA\b|WOODLAND|RELAXO|PUMA|\bADIDAS|\bNIKE\b|DECATHLON'
+category = "Apparel"
+subcategory = "Clothing"
+confidence = "medium"
+
+[[rule]]
+name = "reg Electronics: Hyderabad electronics / mobile retailers"
+type = "expense"
+match = 'POORVIKA|SANGEETHA\s*MOBILES?|\bBIG\s*C\b|\bLOT\s*MOBILES|CELLBAY|CROMA|VIJAY\s*SALES|RELIANCE\s*DIGITAL|BAJAJ\s*ELECTRONICS|GIRIAS|ADITYA\s*VISION|ELECTRONICS?|ELECTRICALS?|MOBILES?\s*(?:STORE|SHOP|WORLD|POINT|HUB)|MOBILE\s*ACCESSOR|IMAGINE\s*STORE|APPLE\s*(?:STORE|RETAIL|AUTHORI[SZ]ED)|ONEPLUS\s*(?:STORE|EXPERIENCE)|SAMSUNG\s*(?:STORE|SMART)|MI\s*(?:STORE|HOME)|VIVO\s*(?:STORE|SERVICE)|OPPO\s*(?:STORE|SERVICE)|REALME'
+exclude = 'RECHARGE|AIRTEL|JIO|PREPAID'
+category = "Electronics"
+confidence = "medium"
+
+[[rule]]
+name = "reg Household: hardware / paints / sanitary / tiles"
+type = "expense"
+match = 'HARDWARE|ASIAN\s*PAINTS|BERGER|JAQUAR|CERA\b|KAJARIA|SANITARY|TILES?\b|PLYWOOD|PLY\s*(?:AND|&)\s*LAMINATES|CEMENT|STEEL\s*(?:CENTRE|CENTER|TRADERS)|ELECTRICAL\s*(?:STORE|SHOP|WORKS)|PAINT\s*(?:SHOP|STORE)|HOME\s*DECOR|CURTAINS?|MATTRESS|SLEEPWELL|WAKEFIT|HOMETOWN|HOME\s*CENTRE|GODREJ\s*INTERIO|NILKAMAL|DURIAN|@HOME|IKEA|PEPPERFRY|URBAN\s*LADDER'
+category = "Household"
+confidence = "medium"
+
+[[rule]]
+name = "reg Household: kitchen / steel / utensils"
+type = "expense"
+match = 'UTENSILS?|KITCHEN\s*(?:WARE|STORE)|HAWKINS|PRESTIGE|BUTTERFLY|PIGEON|\bTUPPERWARE|MILTON|CELLO\b|BOROSIL|STEEL\s*(?:WARE|STORE)|COOKWARE|CROCKERY'
+category = "Household"
+subcategory = "Kitchen"
+confidence = "medium"
+
+[[rule]]
+name = "reg Home Services: local trades and apps"
+type = "expense"
+match = 'URBAN\s*COMPANY|URBANCLAP|URBAN\s*CLAP|HOUSEJOY|\bPLUMBER|PLUMBING|ELECTRICIAN|CARPENTER|PAINTER|PEST\s*CONTROL|HICARE|TERMINIX|SANITI[SZ]|AC\s*(?:SERVICE|REPAIR|GAS)|WASHING\s*MACHINE\s*(?:SERVICE|REPAIR)|RO\s*(?:SERVICE|FILTER)|AQUAGUARD|KENT\s*RO|\bGEYSER|REPAIR\s*(?:SHOP|CENTRE|CENTER)|SERVICE\s*CALL|HANDYMAN'
+category = "Home Services"
+confidence = "medium"
+
+[[rule]]
+name = "reg Household: maid / cook / domestic help"
+type = "expense"
+match = '\bMAID\b|\bCOOK\b|SERVANT|DOMESTIC\s*HELP|HOUSE\s*HELP|HOUSEKEEP|SWEEPER|WATCHMAN|NANNY|BABYSIT|CAR\s*CLEANER|PAPER\s*(?:BOY|BILL)|NEWSPAPER'
+category = "Household"
+subcategory = "Maid"
+confidence = "medium"
+
+[[rule]]
+name = "reg Apparel: laundry / dhobi / ironing"
+type = "expense"
+match = 'LAUNDRY|LAUNDRETTE|DRY\s*CLEAN|DHOBI|IRONING|IRON\s*(?:WALA|SHOP)|WASH\s*(?:AND|&)\s*FOLD|PRESS\s*WALA|URBAN\s*WASH|SPEEDY\s*WASH'
+category = "Apparel"
+subcategory = "Laundry"
+
+[[rule]]
+name = "reg Beauty: salon / barber / spa / grooming"
+type = "expense"
+match = 'SALONS?|BARBER|HAIR\s*(?:CUT|CUTTING|SALON|STUDIO)|HAIRCUT|JAWED\s*HABIB|TONI\s*(?:AND|&)\s*GUY|GREEN\s*TRENDS|NATURALS\s*(?:SALON|SALOON)|LAKME\s*(?:SALON|SALOON)|LOOKS\s*SALON|\bSALOON\b|BEAUTY\s*(?:PARLOU?R|SALON|STUDIO)|PARLOU?R|TRIMMING|\bSPA\b|\bMASSAGE|THREADING|WAXING|MEHENDI|MEHNDI|BRIDAL'
+category = "Beauty"
+subcategory = "Salon & Haircut"
+confidence = "medium"
+
+[[rule]]
+name = "reg Beauty: cosmetics / skincare brands"
+type = "expense"
+match = 'NYKAA|PURPLLE|SUGAR\s*COSMETICS|MAMAEARTH|MINIMALIST|WOW\s*SKIN|DERMA\s*CO|THE\s*MAN\s*COMPANY|BEARDO|BOMBAY\s*SHAVING|LAKME|MAYBELLINE|LOREAL|\bMAC\b|COSMETICS?|PERFUME|FRAGRANCE|BODYCARE|SKINCARE'
+category = "Beauty"
+subcategory = "Cosmetics"
+confidence = "medium"
+
+[[rule]]
+name = "reg Apparel: jewellery stores (gold / silver)"
+type = "expense"
+match = 'TANISHQ|MALABAR\s*GOLD|KALYAN\s*JEWEL|CARATLANE|JOYALUKKAS|BLUESTONE|PNG\s*JEWEL|CHANDANA\s*BROTHERS|KHAZANA|LALITHAA|CMR\s*JEWEL|JEWELL?ERS?|JEWELL?ERY|JEWELS?\b|SILVER\s*(?:SHOP|STORE)|\bGIVA\b'
+category = "Apparel"
+subcategory = "Fashion"
+confidence = "medium"
+
+# ======================================================================= RELIGION / SOCIAL
+[[rule]]
+name = "reg Donations: temples / charities (Telangana & AP circuit)"
+type = "expense"
+match = 'TIRUMALA|\bTTD\b|SRIVARI|YADADRI|YADAGIRI|BHADRACHALAM|VEMULAWADA|BASARA|SRISAILAM|KANAKA\s*DURGA|SIMHACHALAM|ANNAVARAM|DWARAKA\s*TIRUMALA|KONDAGATTU|KEESARAGUTTA|BIRLA\s*MANDIR|CHILKUR|BALAJI\s*TEMPLE|SAI\s*BABA|SHIRDI|TEMPLE|DEVASTHAN|DEVALAYAM|MANDIR|GURUDWARA|\bCHURCH\b|MASJID|MOSQUE|DARGAH|ISKCON|HUNDI|DONATION|ANNADANAM|ANNADAN|CHARITY|FOUNDATION|ORPHANAGE|OLD\s*AGE\s*HOME|\bNGO\b|RELIEF\s*FUND|PM\s*CARES|CM\s*RELIEF'
+exclude = 'COMPUTER|TECH|SYSTEMS|FOUNDATION\s*(?:COURSE|CERT)|LINUX\s*FOUNDATION'
+category = "Donations & Temple"
+confidence = "medium"
+
+[[rule]]
+name = "reg Gift: function halls / weddings / gifts"
+type = "expense"
+match = 'KALYANA\s*MANDAPAM|FUNCTION\s*HALL|CONVENTION|BANQUET|MANDAPAM|WEDDING|MARRIAGE|MARIPELLI|ENGAGEMENT|BIRTHDAY|HOUSE\s*WARMING|GRUHAPRAVESH|BABY\s*SHOWER|BOUQUET|FLORIST|FLOWERS?\b|GIFT(?:S|ING)?\b|ARCHIES|FERNS\s*N\s*PETALS|IGP\b|PHOTO\s*(?:STUDIO|GRAPHY)|\bPHOTOGRAPHERS?\b|EVENT\s*(?:ORGANI|MANAGEMENT)|CATERING|CATERERS?|TENT\s*HOUSE|DJ\s*(?:SOUND|SERVICE)|DECORATIONS?|PRINTERS?\b|CARD\s*(?:PRINT|SHOP)'
+exclude = 'AMAZON|VOUCHER|FLIPKART|GIFT\s*CARD|LOAN|INTEREST|\bEMI\b'
+category = "Gift"
+confidence = "medium"
+
+# ======================================================================= FINANCE / INSURANCE
+[[rule]]
+name = "reg Insurance: LIC and private life insurers"
+type = "expense"
+match = '\bLIC\b|LIFE\s*INSURANCE\s*CORP|HDFC\s*LIFE|ICICI\s*PRU|SBI\s*LIFE|MAX\s*LIFE|TATA\s*AIA|BAJAJ\s*(?:ALLIANZ\s*LIFE|FINSERV\s*LIFE)|PNB\s*METLIFE|KOTAK\s*LIFE|ADITYA\s*BIRLA\s*SUN\s*LIFE|TERM\s*(?:PLAN|INSURANCE)|ENDOWMENT|ULIP|PREMIUM\s*(?:LIC|LIFE)'
+category = "Insurance"
+subcategory = "Life"
+
+[[rule]]
+name = "reg Insurance: health insurers"
+type = "expense"
+match = 'STAR\s*HEALTH|NIVA\s*BUPA|CARE\s*HEALTH|MANIPAL\s*CIGNA|ADITYA\s*BIRLA\s*HEALTH|HEALTH\s*INSURANCE|MEDICLAIM|HDFC\s*ERGO\s*HEALTH|NATIONAL\s*INSURANCE|NEW\s*INDIA\s*ASSURANCE|UNITED\s*INDIA|ORIENTAL\s*INSURANCE'
+category = "Insurance"
+subcategory = "Health"
+confidence = "medium"
+
+[[rule]]
+name = "reg Insurance: vehicle / general insurers and aggregators"
+type = "expense"
+match = 'MOTOR\s*INSURANCE|VEHICLE\s*INSURANCE|BIKE\s*INSURANCE|TWO\s*WHEELER\s*INSURANCE|CAR\s*INSURANCE|\bACKO\b|\bDIGIT\b|GO\s*DIGIT|ICICI\s*LOMBARD|BAJAJ\s*ALLIANZ|TATA\s*AIG|HDFC\s*ERGO|RELIANCE\s*GENERAL|ROYAL\s*SUNDARAM|SBI\s*GENERAL|IFFCO\s*TOKIO|CHOLAMANDALAM\s*MS|FUTURE\s*GENERALI|ZUNO|POLICYBAZAAR|POLICY\s*BAZAAR|TURTLEMINT|INSURANCEDEKHO|INSURANCE\s*PREMIUM'
+category = "Insurance"
+subcategory = "Vehicle"
+confidence = "medium"
+
+[[rule]]
+name = "reg Bank charges: Indian bank fee statements"
+type = "expense"
+match = 'SMS\s*(?:BANKING|ALERT)?\s*CHARGES?|DEBIT\s*CARD\s*(?:ANNUAL|FEE|CHARGES)|ATM\s*(?:CHARGES?|FEE)|NEFT\s*(?:CHARGE|FEE)|IMPS\s*(?:CHARGE|FEE)|RTGS\s*(?:CHARGE|FEE)|MIN(?:IMUM)?\s*(?:AVG|AVERAGE)?\s*BAL(?:ANCE)?\s*(?:CHARGE|PENALTY)|NON\s*MAINTENANCE|AMC\s*CHARGES?|FOLIO\s*CHARGES|CHEQUE\s*(?:BOOK|RETURN|BOUNCE)|CHQ\s*RET|ECS\s*RETURN|NACH\s*RETURN|STOP\s*PAYMENT|ACCOUNT\s*(?:KEEPING|MAINTENANCE)|ANNUAL\s*(?:FEE|CHARGE)|JOINING\s*FEE|CARD\s*(?:FEE|REPLACEMENT)|FOREX\s*MARKUP|DCC\s*MARKUP|GST\s*(?:ON|@)|\bIGST\b|\bCGST\b|\bSGST\b|CONVENIENCE\s*FEE|PLATFORM\s*FEE|PAYMENT\s*(?:GATEWAY|CONVENIENCE)\s*FEE'
+exclude = 'ZOMATO|SWIGGY|AMAZON|FLIPKART|CARD\s*INTEREST'
+category = "Bank Charges"
+confidence = "medium"
+
+# ======================================================================= TECH / BUSINESS COSTS
+[[rule]]
+name = "reg Subscriptions: cloud / hosting / domains / dev tools"
+type = "expense"
+match = 'AMAZON\s*WEB\s*SERVICES|\bAWS\b|MICROSOFT\s*AZURE|GOOGLE\s*CLOUD|DIGITAL\s*OCEAN|DIGITALOCEAN|HETZNER|VULTR|LINODE|AKAMAI|OVH|CLOUDFLARE|NAMECHEAP|GODADDY|HOSTINGER|BIGROCK|BLUEHOST|HOSTGATOR|NETLIFY|VERCEL|HEROKU|RAILWAY\.APP|MONGODB|ATLAS|GITHUB|GITLAB|BITBUCKET|ATLASSIAN|JETBRAINS|POSTMAN|DOCKER|TAILSCALE|ZEROTIER|1PASSWORD|LASTPASS|BITWARDEN|PROTON|ZOHO|GOOGLE\s*WORKSPACE|G\s*SUITE|MICROSOFT\s*365|OFFICE\s*365|ADOBE|CANVA|FIGMA|NOTION|SLACK|ZOOM|DROPBOX|ICLOUD|GOOGLE\s*ONE|DOMAIN\s*(?:RENEW|REGISTRATION)|SSL\s*CERT'
+category = "Subscriptions"
+confidence = "medium"
+
+[[rule]]
+name = "reg Subscriptions: AI tools"
+type = "expense"
+match = 'OPENAI|CHATGPT|ANTHROPIC|CLAUDE|CURSOR|MIDJOURNEY|PERPLEXITY|COPILOT|REPLIT|LOVABLE|GEMINI|GROK|ELEVENLABS|RUNWAY\s*ML|HUGGING\s*FACE|OPENROUTER|TOGETHER\s*AI|DEEPSEEK|MISTRAL|CODEIUM|WINDSURF'
+category = "Subscriptions"
+subcategory = "AI Tools"
+
+# ======================================================================= INCOME (India)
+[[rule]]
+name = "reg Income: salary credit patterns (NEFT/payroll)"
+type = "income"
+match = 'SALARY|SAL\s*CR|PAYROLL|NEFT\s*-?\s*(?:SAL|PAYROLL)|SALARY\s*FOR|\bSAL\b\s*(?:FOR|OF)|MONTHLY\s*PAY'
+exclude = 'ESOP|PF\b|PENSION|REIMB|BONUS'
+category = "Salary"
+
+[[rule]]
+name = "reg Income: bonus / variable pay / incentive"
+type = "income"
+match = 'BONUS|VARIABLE\s*PAY|PERFORMANCE\s*(?:BONUS|PAY|INCENTIVE)|INCENTIVE|JOINING\s*BONUS|RETENTION|SPOT\s*AWARD|DIWALI\s*BONUS|FESTIVAL\s*BONUS|GRATUITY'
+category = "Salary"
+subcategory = "Performance Bonuses"
+confidence = "medium"
+
+[[rule]]
+name = "reg Income: leave encashment / full & final"
+type = "income"
+match = 'LEAVE\s*ENCASH|FULL\s*(?:AND|&)\s*FINAL|\bF\s*&\s*F\b|NOTICE\s*PAY|SEVERANCE'
+category = "Salary"
+confidence = "medium"
+
+[[rule]]
+name = "reg Income: reimbursements (expense claims)"
+type = "income"
+match = 'REIMB(?:URSEMENT)?|EXPENSE\s*CLAIM|TRAVEL\s*CLAIM|MEDICAL\s*CLAIM|TA\s*DA|CLAIM\s*SETTLE|PLUXEE\s*REIMB'
+category = "Salary"
+subcategory = "Reimbursements"
+confidence = "medium"
+
+[[rule]]
+name = "reg Income: PF / EPFO / NPS employer"
+type = "income"
+match = 'EPFO|EPF\s*(?:CONTRIB|INT)|\bPF\s*(?:CONTRIB|INTEREST|SETTLE)|PROVIDENT\s*FUND|EMPLOYER\s*(?:PF|CONTRIB)'
+category = "Salary"
+subcategory = "PF Contribution"
+confidence = "medium"
+
+[[rule]]
+name = "reg Income: rent received"
+type = "income"
+match = 'RENT\s*(?:RECEIVED|FROM|INCOME|FOR)|TENANT|HOUSE\s*RENT|SHOP\s*RENT'
+category = "Rental Income"
+confidence = "medium"
+
+[[rule]]
+name = "reg Income: sale of old items / assets"
+type = "income"
+match = 'SOLD|SALE\s*OF|SELLING|OLX|QUIKR|SECOND\s*HAND|USED\s*(?:TV|FRIDGE|BIKE|CAR|PHONE|LAPTOP)|CARS24|SPINNY|CASHIFY|\bCONTROLZ|RECYCLE'
+exclude = 'REFUND|REVERS|CASHBACK|SALE\s*OF\s*(?:SHARES|MF|UNITS|SECURITIES)'
+category = "Asset Sales"
+confidence = "medium"
+
+[[rule]]
+name = "reg Income: dividends / interest / FD"
+type = "income"
+match = 'DIVIDEND|\bDIV\b|INT\.?\s*PD|INTEREST\s*(?:CREDIT|PAID|CAPITALI[SZ]ED|ON\s*(?:SAVINGS|SB|DEPOSIT))|SAVINGS?\s*INT|\bINT\s*CR|FD\s*(?:INT|MATURITY)|RD\s*(?:INT|MATURITY)|FIXED\s*DEPOSIT|DEPOSIT\s*INTEREST|\bTDR\b'
+exclude = 'TDS|FD|FIXED|DEPOSIT|DIVIDEND|\bDIV\b'
+category = "Interest"
+subcategory = "Savings"
+
+[[rule]]
+name = "reg Income: dividends"
+type = "income"
+match = 'DIVIDEND|\bDIV\b'
+category = "Investment Gain"
+subcategory = "Dividends"
+
+[[rule]]
+name = "reg Income: referral / rewards / scratch cards"
+type = "income"
+match = 'REFERRAL|REFER\s*(?:AND|&)\s*EARN|SCRATCH\s*CARD|GOOGLE\s*PAY\s*REWARD|GPAY\s*REWARD|PHONEPE\s*REWARD|PAYTM\s*(?:CASHBACK|REWARD)|WELCOME\s*BONUS|SIGN\s*-?UP\s*BONUS|LOYALTY|POINTS\s*(?:REDEEM|CREDIT)|CRED\s*(?:COINS|CASH)|SUPERCOIN'
+max_amount = 5000
+category = "Cashback & Rewards"
+
+[[rule]]
+name = "reg Income: GST / TDS / income-tax refunds"
+type = "income"
+match = 'INCOME\s*TAX\s*REFUND|ITD\s*REFUND|TAX\s*REFUND|CPC\s*(?:REFUND|BANGALORE)|\bTDS\s*REFUND|GST\s*REFUND|ITR\s*REFUND'
+category = "Tax Refund"

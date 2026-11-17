@@ -11,6 +11,9 @@ Thanks for helping. This tool edits people's financial records, so the bar is sa
 - Keep `kb.toml` **generic**: well-known merchants and statement patterns only, no personal payees,
   no personal category names. Personal rules belong in your own untracked `rules.toml`.
 
+## Regional packs
+Other cities/states are welcome as `kb_<region>.toml` (public merchants and institutions only).
+
 ## Adding knowledge-base rules
 - Use word boundaries on short tokens (`\bAMUL\b`, not `AMUL`; it would match inside names).
 - Prefer `confidence = "medium"` when a keyword is ambiguous; use `flag = "..."` for transfer-like rows.
